@@ -165,3 +165,4 @@ sql_app.db
 # User-uploaded content
 static/images/*
 !static/images/.gitkeep
+static
