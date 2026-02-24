@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict
+import json
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 
 class LocalizedString(BaseModel):
     en: str
@@ -11,11 +12,27 @@ class NewsBase(BaseModel):
     content: Dict[str, str]
     excerpt: Optional[Dict[str, str]] = None
     author: Optional[str] = None
-    category: Optional[str] = None
-    status: Optional[str] = "Draft"
+    category: Optional[Dict[str, str]] = None
+    status: Optional[Dict[str, str]] = None
     reading_time: Optional[int] = None
     thumbnail_url: Optional[str] = None
     tags: Optional[List[str]] = None
+
+    @field_validator("category", "status", mode="before")
+    @classmethod
+    def parse_legacy_json_or_string(cls, value: Any) -> Optional[Dict[str, str]]:
+        if isinstance(value, str):
+            try:
+                # Try parsing if it's a JSON string
+                parsed = json.loads(value)
+                if isinstance(parsed, dict):
+                    return parsed
+            except json.JSONDecodeError:
+                pass
+            
+            # If it's a plain string like "Published" or "impact"
+            return {"en": value, "fr": value}
+        return value
 
 class NewsCreate(BaseModel):
     title: str

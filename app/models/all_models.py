@@ -10,8 +10,8 @@ class News(Base):
     content = Column(JSONB, nullable=False) # {"en": "...", "fr": "..."}
     excerpt = Column(JSONB) # {"en": "...", "fr": "..."}
     author = Column(String)
-    category = Column(String) # impact, field, press
-    status = Column(String, default="Draft") # Draft, Published, Archived
+    category = Column(JSONB) # {"en": "...", "fr": "..."}
+    status = Column(JSONB, default={"en": "Draft", "fr": "Brouillon"}) # {"en": "...", "fr": "..."}
     reading_time = Column(Integer) # in minutes
     thumbnail_url = Column(String)
     tags = Column(JSONB) # ["tag1", "tag2"]
