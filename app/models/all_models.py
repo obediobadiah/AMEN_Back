@@ -59,6 +59,7 @@ class Event(Base):
     status = Column(String) # Upcoming, Past
     registration_link = Column(String)
     category = Column(String)
+    thumbnail_url = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Multimedia(Base):
