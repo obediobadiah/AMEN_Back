@@ -62,6 +62,20 @@ class Event(Base):
     thumbnail_url = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+class Publication(Base):
+    __tablename__ = "publications"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(JSONB, nullable=False) # {"en": "...", "fr": "..."}
+    description = Column(JSONB) # {"en": "...", "fr": "..."}
+    category = Column(JSONB) # {"en": "...", "fr": "..."}
+    date = Column(DateTime)
+    file_url = Column(String, nullable=False)
+    thumbnail_url = Column(String)
+    file_size = Column(String)
+    file_type = Column(String)
+    downloads = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class Multimedia(Base):
     __tablename__ = "multimedia"
     id = Column(Integer, primary_key=True, index=True)
@@ -102,3 +116,4 @@ class LiveStat(Base):
     icon_name = Column(String)
     category = Column(String)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
