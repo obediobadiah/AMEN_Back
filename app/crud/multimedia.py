@@ -2,14 +2,24 @@ from sqlalchemy.orm import Session
 from ..models.all_models import Multimedia
 from ..schemas.multimedia import MultimediaCreate, MultimediaUpdate
 
+from ..core.translate import multi_translate
+
 def get_multimedia(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Multimedia).offset(skip).limit(limit).all()
+    return db.query(Multimedia).order_by(Multimedia.id.desc()).offset(skip).limit(limit).all()
 
 def get_multimedia_by_id(db: Session, multimedia_id: int):
     return db.query(Multimedia).filter(Multimedia.id == multimedia_id).first()
 
 def create_multimedia(db: Session, multimedia: MultimediaCreate):
-    db_multimedia = Multimedia(**multimedia.model_dump())
+    media_data = multimedia.model_dump()
+    source_lang = media_data.pop("source_lang", "fr")
+    
+    # Auto-translate
+    media_data["title"] = multi_translate(media_data["title"], source_lang)
+    if media_data.get("category"):
+        media_data["category"] = multi_translate(media_data["category"], source_lang)
+    
+    db_multimedia = Multimedia(**media_data)
     db.add(db_multimedia)
     db.commit()
     db.refresh(db_multimedia)
@@ -19,8 +29,19 @@ def update_multimedia(db: Session, multimedia_id: int, multimedia: MultimediaUpd
     db_multimedia = get_multimedia_by_id(db, multimedia_id)
     if not db_multimedia:
         return None
-    for key, value in multimedia.model_dump(exclude_unset=True).items():
+    
+    update_data = multimedia.model_dump(exclude_unset=True)
+    source_lang = update_data.pop("source_lang", "fr")
+    
+    # Handle re-translation if flat strings are provided
+    if isinstance(update_data.get("title"), str):
+        update_data["title"] = multi_translate(update_data["title"], source_lang)
+    if isinstance(update_data.get("category"), str):
+        update_data["category"] = multi_translate(update_data["category"], source_lang)
+        
+    for key, value in update_data.items():
         setattr(db_multimedia, key, value)
+        
     db.commit()
     db.refresh(db_multimedia)
     return db_multimedia

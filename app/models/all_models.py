@@ -76,6 +76,15 @@ class Publication(Base):
     downloads = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+class Album(Base):
+    __tablename__ = "albums"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(JSONB, nullable=False) # {"en": "...", "fr": "..."}
+    description = Column(JSONB) # {"en": "...", "fr": "..."}
+    thumbnail_url = Column(String)
+    is_public = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class Multimedia(Base):
     __tablename__ = "multimedia"
     id = Column(Integer, primary_key=True, index=True)
@@ -83,7 +92,8 @@ class Multimedia(Base):
     media_url = Column(String, nullable=False)
     thumbnail_url = Column(String)
     type = Column(String) # photo, video
-    category = Column(String) # Nature, Health, Education
+    category = Column(JSONB) # {"en": "Nature", "fr": "Nature"}
+    album_id = Column(Integer, ForeignKey("albums.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class GovernanceMember(Base):

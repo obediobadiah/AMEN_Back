@@ -3,16 +3,13 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional, Dict, Any
 
-class ResourceBase(BaseModel):
-    title: Dict[str, str]
+class AlbumBase(BaseModel):
+    name: Dict[str, str]
     description: Optional[Dict[str, str]] = None
-    file_url: str
-    file_size: Optional[str] = None
-    file_type: Optional[str] = None # PDF, XLS
-    category: Optional[str] = None # report, guide, infographic, policy, database
-    publication_date: Optional[datetime] = None
+    thumbnail_url: Optional[str] = None
+    is_public: bool = False
 
-    @field_validator("title", "description", mode="before")
+    @field_validator("name", "description", mode="before")
     @classmethod
     def parse_legacy_json_or_string(cls, value: Any) -> Optional[Dict[str, str]]:
         if isinstance(value, str):
@@ -25,14 +22,21 @@ class ResourceBase(BaseModel):
             return {"en": value, "fr": value}
         return value
 
-class ResourceCreate(ResourceBase):
-    pass
+class AlbumCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    is_public: bool = False
+    source_lang: str = "fr"
 
-class ResourceUpdate(ResourceBase):
-    title: Optional[Dict[str, str]] = None
-    file_url: Optional[str] = None
+class AlbumUpdate(BaseModel):
+    name: Optional[Dict[str, str] | str] = None
+    description: Optional[Dict[str, str] | str] = None
+    thumbnail_url: Optional[str] = None
+    is_public: Optional[bool] = None
+    source_lang: Optional[str] = "fr"
 
-class Resource(ResourceBase):
+class Album(AlbumBase):
     id: int
     created_at: datetime
     

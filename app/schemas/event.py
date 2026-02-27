@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict
+import json
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
-from typing import Optional, Dict, Union
+from typing import Optional, Dict, Union, Any
 
 class EventBase(BaseModel):
     title: Dict[str, str]
@@ -12,6 +13,19 @@ class EventBase(BaseModel):
     registration_link: Optional[str] = None
     category: Optional[str] = None
     thumbnail_url: Optional[str] = None
+
+    @field_validator("title", "description", "location", mode="before")
+    @classmethod
+    def parse_legacy_json_or_string(cls, value: Any) -> Optional[Dict[str, str]]:
+        if isinstance(value, str):
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, dict):
+                    return parsed
+            except json.JSONDecodeError:
+                pass
+            return {"en": value, "fr": value}
+        return value
 
 class EventCreate(BaseModel):
     title: str

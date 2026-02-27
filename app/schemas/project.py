@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict
+import json
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 
 class ProjectBase(BaseModel):
     title: Dict[str, str]
@@ -15,6 +16,19 @@ class ProjectBase(BaseModel):
     goals: Optional[Dict[str, List[str]]] = None
     achievements: Optional[Dict[str, List[str]]] = None
     image_url: Optional[str] = None
+
+    @field_validator("title", "description", "location", "overview", mode="before")
+    @classmethod
+    def parse_legacy_json_or_string(cls, value: Any) -> Optional[Dict[str, str]]:
+        if isinstance(value, str):
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, dict):
+                    return parsed
+            except json.JSONDecodeError:
+                pass
+            return {"en": value, "fr": value}
+        return value
 
 class ProjectCreate(ProjectBase):
     pass
