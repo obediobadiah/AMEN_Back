@@ -11,12 +11,12 @@ def get_album_by_id(db: Session, album_id: int):
 
 def create_album(db: Session, album: AlbumCreate):
     album_data = album.model_dump()
-    source_lang = album_data.pop("source_lang", "fr")
+    album_data.pop("source_lang", None)
     
     # Auto-translate
-    album_data["name"] = multi_translate(album_data["name"], source_lang)
+    album_data["name"] = multi_translate(album_data["name"])
     if album_data.get("description"):
-        album_data["description"] = multi_translate(album_data["description"], source_lang)
+        album_data["description"] = multi_translate(album_data["description"])
     
     db_album = Album(**album_data)
     db.add(db_album)
@@ -30,13 +30,13 @@ def update_album(db: Session, album_id: int, album: AlbumUpdate):
         return None
     
     update_data = album.model_dump(exclude_unset=True)
-    source_lang = update_data.pop("source_lang", "fr")
+    update_data.pop("source_lang", None)
     
     # Handle re-translation
     if isinstance(update_data.get("name"), str):
-        update_data["name"] = multi_translate(update_data["name"], source_lang)
+        update_data["name"] = multi_translate(update_data["name"])
     if isinstance(update_data.get("description"), str):
-        update_data["description"] = multi_translate(update_data["description"], source_lang)
+        update_data["description"] = multi_translate(update_data["description"])
         
     for key, value in update_data.items():
         setattr(db_album, key, value)

@@ -11,13 +11,14 @@ def get_event_by_id(db: Session, event_id: int):
 
 def create_event(db: Session, event: EventCreate):
     event_data = event.model_dump()
-    source_lang = event_data.pop("source_lang", "fr")
+    event_data.pop("source_lang", None)
     
-    event_data["title"] = multi_translate(event_data["title"], source_lang)
+    # Auto-translate
+    event_data["title"] = multi_translate(event_data["title"])
     if event_data.get("description"):
-        event_data["description"] = multi_translate(event_data["description"], source_lang)
+        event_data["description"] = multi_translate(event_data["description"])
     if event_data.get("location"):
-        event_data["location"] = multi_translate(event_data["location"], source_lang)
+        event_data["location"] = multi_translate(event_data["location"])
         
     db_event = Event(**event_data)
     db.add(db_event)
@@ -31,14 +32,15 @@ def update_event(db: Session, event_id: int, event: EventUpdate):
         return None
         
     update_data = event.model_dump(exclude_unset=True)
-    source_lang = update_data.pop("source_lang", "fr")
+    update_data.pop("source_lang", None)
     
+    # Handle re-translation
     if isinstance(update_data.get("title"), str):
-        update_data["title"] = multi_translate(update_data["title"], source_lang)
+        update_data["title"] = multi_translate(update_data.get("title"))
     if isinstance(update_data.get("description"), str):
-        update_data["description"] = multi_translate(update_data["description"], source_lang)
+        update_data["description"] = multi_translate(update_data.get("description"))
     if isinstance(update_data.get("location"), str):
-        update_data["location"] = multi_translate(update_data["location"], source_lang)
+        update_data["location"] = multi_translate(update_data.get("location"))
         
     for key, value in update_data.items():
         setattr(db_event, key, value)

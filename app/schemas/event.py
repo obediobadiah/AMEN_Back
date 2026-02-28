@@ -1,5 +1,5 @@
 import json
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 from datetime import datetime
 from typing import Optional, Dict, Union, Any
 
@@ -13,6 +13,15 @@ class EventBase(BaseModel):
     registration_link: Optional[str] = None
     category: Optional[str] = None
     thumbnail_url: Optional[str] = None
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, v: Any, info: ValidationInfo) -> Any:
+        if info.field_name == "source_lang":
+            return v
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
 
     @field_validator("title", "description", "location", mode="before")
     @classmethod
@@ -28,11 +37,11 @@ class EventBase(BaseModel):
         return value
 
 class EventCreate(BaseModel):
-    title: str
-    description: Optional[str] = None
+    title: Any
+    description: Optional[Any] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    location: Optional[str] = None
+    location: Optional[Any] = None
     status: Optional[str] = None
     registration_link: Optional[str] = None
     category: Optional[str] = None
@@ -40,11 +49,11 @@ class EventCreate(BaseModel):
     source_lang: Optional[str] = "fr"
 
 class EventUpdate(BaseModel):
-    title: Optional[Union[str, Dict[str, str]]] = None
-    description: Optional[Union[str, Dict[str, str]]] = None
+    title: Optional[Any] = None
+    description: Optional[Any] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    location: Optional[Union[str, Dict[str, str]]] = None
+    location: Optional[Any] = None
     status: Optional[str] = None
     registration_link: Optional[str] = None
     category: Optional[str] = None

@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from ..models.all_models import Multimedia
 from ..schemas.multimedia import MultimediaCreate, MultimediaUpdate
-
 from ..core.translate import multi_translate
 
 def get_multimedia(db: Session, skip: int = 0, limit: int = 100):
@@ -12,12 +11,12 @@ def get_multimedia_by_id(db: Session, multimedia_id: int):
 
 def create_multimedia(db: Session, multimedia: MultimediaCreate):
     media_data = multimedia.model_dump()
-    source_lang = media_data.pop("source_lang", "fr")
+    media_data.pop("source_lang", None)
     
     # Auto-translate
-    media_data["title"] = multi_translate(media_data["title"], source_lang)
+    media_data["title"] = multi_translate(media_data["title"])
     if media_data.get("category"):
-        media_data["category"] = multi_translate(media_data["category"], source_lang)
+        media_data["category"] = multi_translate(media_data["category"])
     
     db_multimedia = Multimedia(**media_data)
     db.add(db_multimedia)
@@ -31,13 +30,13 @@ def update_multimedia(db: Session, multimedia_id: int, multimedia: MultimediaUpd
         return None
     
     update_data = multimedia.model_dump(exclude_unset=True)
-    source_lang = update_data.pop("source_lang", "fr")
+    update_data.pop("source_lang", None)
     
     # Handle re-translation if flat strings are provided
     if isinstance(update_data.get("title"), str):
-        update_data["title"] = multi_translate(update_data["title"], source_lang)
+        update_data["title"] = multi_translate(update_data["title"])
     if isinstance(update_data.get("category"), str):
-        update_data["category"] = multi_translate(update_data["category"], source_lang)
+        update_data["category"] = multi_translate(update_data["category"])
         
     for key, value in update_data.items():
         setattr(db_multimedia, key, value)

@@ -1,5 +1,5 @@
 import json
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 from datetime import datetime
 from typing import Optional, Dict, Any
 
@@ -10,6 +10,15 @@ class MultimediaBase(BaseModel):
     type: Optional[str] = None # photo, video
     category: Optional[Dict[str, str]] = None # {"en": "Nature", "fr": "Nature"}
     album_id: Optional[int] = None
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, v: Any, info: ValidationInfo) -> Any:
+        if info.field_name == "source_lang":
+            return v
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
 
     @field_validator("title", "category", mode="before")
     @classmethod
@@ -28,20 +37,20 @@ class MultimediaBase(BaseModel):
         return value
 
 class MultimediaCreate(BaseModel):
-    title: str
+    title: Any
     media_url: str
     thumbnail_url: Optional[str] = None
     type: Optional[str] = None
-    category: Optional[str] = None
+    category: Optional[Any] = None
     album_id: Optional[int] = None
     source_lang: str = "fr"
 
 class MultimediaUpdate(BaseModel):
-    title: Optional[Dict[str, str] | str] = None
+    title: Optional[Any] = None
     media_url: Optional[str] = None
     thumbnail_url: Optional[str] = None
     type: Optional[str] = None
-    category: Optional[Dict[str, str] | str] = None
+    category: Optional[Any] = None
     album_id: Optional[int] = None
     source_lang: Optional[str] = None
 

@@ -1,5 +1,5 @@
 import json
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 from datetime import datetime
 from typing import Optional, Dict, Any
 
@@ -10,6 +10,13 @@ class GovernanceBase(BaseModel):
     photo_url: Optional[str] = None
     organ_id: Optional[str] = None # ag, cd, pe, dg
     order: Optional[int] = 0
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, v: Any, info: ValidationInfo) -> Any:
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
 
     @field_validator("role", "bio", mode="before")
     @classmethod
@@ -24,11 +31,21 @@ class GovernanceBase(BaseModel):
             return {"en": value, "fr": value}
         return value
 
-class GovernanceCreate(GovernanceBase):
-    pass
+class GovernanceCreate(BaseModel):
+    name: str
+    role: Any
+    bio: Optional[Any] = None
+    photo_url: Optional[str] = None
+    organ_id: Optional[str] = None
+    order: Optional[int] = 0
 
-class GovernanceUpdate(GovernanceBase):
+class GovernanceUpdate(BaseModel):
     name: Optional[str] = None
+    role: Optional[Any] = None
+    bio: Optional[Any] = None
+    photo_url: Optional[str] = None
+    organ_id: Optional[str] = None
+    order: Optional[int] = None
 
 class Governance(GovernanceBase):
     id: int

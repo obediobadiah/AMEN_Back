@@ -1,5 +1,5 @@
 import json
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 from datetime import datetime
 from typing import Optional, Dict, Any
 
@@ -8,6 +8,13 @@ class LiveStatBase(BaseModel):
     value: str
     icon_name: Optional[str] = None
     category: Optional[str] = None
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, v: Any, info: ValidationInfo) -> Any:
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
 
     @field_validator("label", mode="before")
     @classmethod
@@ -22,11 +29,17 @@ class LiveStatBase(BaseModel):
             return {"en": value, "fr": value}
         return value
 
-class LiveStatCreate(LiveStatBase):
-    pass
+class LiveStatCreate(BaseModel):
+    label: Any
+    value: str
+    icon_name: Optional[str] = None
+    category: Optional[str] = None
 
-class LiveStatUpdate(LiveStatBase):
+class LiveStatUpdate(BaseModel):
+    label: Optional[Any] = None
     value: Optional[str] = None
+    icon_name: Optional[str] = None
+    category: Optional[str] = None
 
 class LiveStat(LiveStatBase):
     id: int

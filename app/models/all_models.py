@@ -28,7 +28,7 @@ class Project(Base):
     location = Column(JSONB) # {"en": "...", "fr": "..."}
     start_date = Column(DateTime)
     end_date = Column(DateTime)
-    category = Column(String)
+    category = Column(JSONB)
     impact_stats = Column(JSONB) # {"en": {"label": "...", "value": "..."}, "fr": {...}}
     overview = Column(JSONB)
     goals = Column(JSONB) # {"en": ["..."], "fr": ["..."]}

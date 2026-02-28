@@ -1,5 +1,5 @@
 import json
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 from datetime import datetime
 from typing import Optional, Dict, List, Any
 
@@ -18,6 +18,15 @@ class NewsBase(BaseModel):
     thumbnail_url: Optional[str] = None
     tags: Optional[List[str]] = None
 
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, v: Any, info: ValidationInfo) -> Any:
+        if info.field_name == "source_lang":
+            return v
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
+
     @field_validator("category", "status", mode="before")
     @classmethod
     def parse_legacy_json_or_string(cls, value: Any) -> Optional[Dict[str, str]]:
@@ -35,23 +44,23 @@ class NewsBase(BaseModel):
         return value
 
 class NewsCreate(BaseModel):
-    title: str
-    content: str
-    excerpt: Optional[str] = None
+    title: Any
+    content: Any
+    excerpt: Optional[Any] = None
     author: Optional[str] = None
-    category: Optional[str] = None
-    status: Optional[str] = "Draft"
+    category: Optional[Any] = None
+    status: Optional[Any] = "Draft"
     reading_time: Optional[int] = None
     thumbnail_url: Optional[str] = None
     tags: Optional[List[str]] = None
     source_lang: str = "fr" # Default to French, or "en" based on admin input
 
 class NewsUpdate(BaseModel):
-    title: Optional[Dict[str, str] | str] = None
-    content: Optional[Dict[str, str] | str] = None
-    excerpt: Optional[Dict[str, str] | str] = None
-    status: Optional[str] = None
-    category: Optional[str] = None
+    title: Optional[Any] = None
+    content: Optional[Any] = None
+    excerpt: Optional[Any] = None
+    status: Optional[Any] = None
+    category: Optional[Any] = None
     author: Optional[str] = None
     reading_time: Optional[int] = None
     thumbnail_url: Optional[str] = None

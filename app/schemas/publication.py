@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 from datetime import datetime
 from typing import Optional, Dict, Any
 
@@ -13,6 +13,15 @@ class PublicationBase(BaseModel):
     file_type: Optional[str] = None
     downloads: Optional[int] = 0
 
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, v: Any, info: ValidationInfo) -> Any:
+        if info.field_name == "source_lang":
+            return v
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
+
     @field_validator("title", "description", "category", mode="before")
     @classmethod
     def ensure_dict(cls, value: Any) -> Any:
@@ -21,9 +30,9 @@ class PublicationBase(BaseModel):
         return value
 
 class PublicationCreate(BaseModel):
-    title: str
-    description: Optional[str] = None
-    category: Optional[str] = None
+    title: Any
+    description: Optional[Any] = None
+    category: Optional[Any] = None
     date: Optional[datetime] = None
     file_url: str
     thumbnail_url: Optional[str] = None
@@ -32,9 +41,9 @@ class PublicationCreate(BaseModel):
     source_lang: str = "fr"
 
 class PublicationUpdate(BaseModel):
-    title: Optional[Dict[str, str] | str] = None
-    description: Optional[Dict[str, str] | str] = None
-    category: Optional[Dict[str, str] | str] = None
+    title: Optional[Any] = None
+    description: Optional[Any] = None
+    category: Optional[Any] = None
     date: Optional[datetime] = None
     file_url: Optional[str] = None
     thumbnail_url: Optional[str] = None

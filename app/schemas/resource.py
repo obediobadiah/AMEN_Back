@@ -1,5 +1,5 @@
 import json
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 from datetime import datetime
 from typing import Optional, Dict, Any
 
@@ -11,6 +11,13 @@ class ResourceBase(BaseModel):
     file_type: Optional[str] = None # PDF, XLS
     category: Optional[str] = None # report, guide, infographic, policy, database
     publication_date: Optional[datetime] = None
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, v: Any, info: ValidationInfo) -> Any:
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
 
     @field_validator("title", "description", mode="before")
     @classmethod
@@ -25,12 +32,23 @@ class ResourceBase(BaseModel):
             return {"en": value, "fr": value}
         return value
 
-class ResourceCreate(ResourceBase):
-    pass
+class ResourceCreate(BaseModel):
+    title: Any
+    description: Optional[Any] = None
+    file_url: str
+    file_size: Optional[str] = None
+    file_type: Optional[str] = None
+    category: Optional[str] = None
+    publication_date: Optional[datetime] = None
 
-class ResourceUpdate(ResourceBase):
-    title: Optional[Dict[str, str]] = None
+class ResourceUpdate(BaseModel):
+    title: Optional[Any] = None
+    description: Optional[Any] = None
     file_url: Optional[str] = None
+    file_size: Optional[str] = None
+    file_type: Optional[str] = None
+    category: Optional[str] = None
+    publication_date: Optional[datetime] = None
 
 class Resource(ResourceBase):
     id: int
