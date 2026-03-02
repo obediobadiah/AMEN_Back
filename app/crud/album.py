@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models.all_models import Album
+from ..models.all_models import Album, Multimedia
 from ..schemas.album import AlbumCreate, AlbumUpdate
 from ..core.translate import multi_translate
 
@@ -49,6 +49,10 @@ def delete_album(db: Session, album_id: int):
     db_album = get_album_by_id(db, album_id)
     if not db_album:
         return None
+    
+    # Delete all associated multimedia items
+    db.query(Multimedia).filter(Multimedia.album_id == album_id).delete()
+    
     db.delete(db_album)
     db.commit()
     return db_album
