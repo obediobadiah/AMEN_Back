@@ -7,6 +7,7 @@ class ResourceBase(BaseModel):
     title: Dict[str, str]
     description: Optional[Dict[str, str]] = None
     file_url: str
+    thumbnail_url: Optional[str] = None
     file_size: Optional[str] = None
     file_type: Optional[str] = None # PDF, XLS
     category: Optional[str] = None # report, guide, infographic, policy, database
@@ -36,22 +37,27 @@ class ResourceCreate(BaseModel):
     title: Any
     description: Optional[Any] = None
     file_url: str
+    thumbnail_url: Optional[str] = None
     file_size: Optional[str] = None
     file_type: Optional[str] = None
     category: Optional[str] = None
     publication_date: Optional[datetime] = None
+    source_lang: Optional[str] = None
 
 class ResourceUpdate(BaseModel):
     title: Optional[Any] = None
     description: Optional[Any] = None
     file_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
     file_size: Optional[str] = None
     file_type: Optional[str] = None
     category: Optional[str] = None
     publication_date: Optional[datetime] = None
+    source_lang: Optional[str] = None
 
 class Resource(ResourceBase):
     id: int
+    downloads: Optional[int] = 0
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)

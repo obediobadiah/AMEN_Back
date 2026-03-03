@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any
 class PublicationBase(BaseModel):
     title: Dict[str, str] | str
     description: Optional[Dict[str, str] | str] = None
-    category: Optional[Dict[str, str] | str] = None
+    category: Optional[str] = None
     date: Optional[datetime] = None
     file_url: str
     thumbnail_url: Optional[str] = None
@@ -22,7 +22,7 @@ class PublicationBase(BaseModel):
             return None
         return v
 
-    @field_validator("title", "description", "category", mode="before")
+    @field_validator("title", "description", mode="before")
     @classmethod
     def ensure_dict(cls, value: Any) -> Any:
         if isinstance(value, str) and value:
@@ -32,7 +32,7 @@ class PublicationBase(BaseModel):
 class PublicationCreate(BaseModel):
     title: Any
     description: Optional[Any] = None
-    category: Optional[Any] = None
+    category: Optional[str] = None
     date: Optional[datetime] = None
     file_url: str
     thumbnail_url: Optional[str] = None
@@ -43,7 +43,7 @@ class PublicationCreate(BaseModel):
 class PublicationUpdate(BaseModel):
     title: Optional[Any] = None
     description: Optional[Any] = None
-    category: Optional[Any] = None
+    category: Optional[str] = None
     date: Optional[datetime] = None
     file_url: Optional[str] = None
     thumbnail_url: Optional[str] = None

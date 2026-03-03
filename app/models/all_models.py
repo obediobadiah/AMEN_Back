@@ -42,10 +42,12 @@ class Resource(Base):
     title = Column(JSONB, nullable=False)
     description = Column(JSONB)
     file_url = Column(String, nullable=False)
+    thumbnail_url = Column(String)  # First page of PDF as image
     file_size = Column(String)
     file_type = Column(String) # PDF, XLS
     category = Column(String) # report, guide, infographic, policy, database
     publication_date = Column(DateTime)
+    downloads = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Event(Base):
@@ -67,7 +69,7 @@ class Publication(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(JSONB, nullable=False) # {"en": "...", "fr": "..."}
     description = Column(JSONB) # {"en": "...", "fr": "..."}
-    category = Column(JSONB) # {"en": "...", "fr": "..."}
+    category = Column(String) # "annual", "research", "policy"
     date = Column(DateTime)
     file_url = Column(String, nullable=False)
     thumbnail_url = Column(String)

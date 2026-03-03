@@ -18,9 +18,6 @@ def create_publication(db: Session, publication: PublicationCreate):
     if pub_data.get("description"):
         pub_data["description"] = multi_translate(pub_data["description"])
     
-    if isinstance(pub_data.get("category"), str):
-        pub_data["category"] = multi_translate(pub_data["category"])
-    
     db_publication = Publication(**pub_data)
     db.add(db_publication)
     db.commit()
@@ -40,8 +37,6 @@ def update_publication(db: Session, publication_id: int, publication: Publicatio
         update_data["title"] = multi_translate(update_data["title"])
     if isinstance(update_data.get("description"), str):
         update_data["description"] = multi_translate(update_data["description"])
-    if isinstance(update_data.get("category"), str):
-        update_data["category"] = multi_translate(update_data["category"])
         
     for key, value in update_data.items():
         setattr(db_publication, key, value)
