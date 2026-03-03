@@ -105,8 +105,9 @@ class GovernanceMember(Base):
     role = Column(JSONB) # {"en": "...", "fr": "..."}
     bio = Column(JSONB)
     photo_url = Column(String)
-    organ_id = Column(String) # ag, cd, pe, dg
+    organ_id = Column(String) # ag, cd, pe, dg, etc.
     order = Column(Integer, default=0)
+    group_type = Column(String, default="governance")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Inquiry(Base):

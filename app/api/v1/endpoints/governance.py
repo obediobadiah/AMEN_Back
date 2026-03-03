@@ -8,8 +8,8 @@ from ....db.session import get_db
 router = APIRouter()
 
 @router.get("/", response_model=List[schema_gov.Governance])
-def read_members(organ_id: Optional[str] = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud_gov.get_members(db, skip=skip, limit=limit, organ_id=organ_id)
+def read_members(organ_id: Optional[str] = None, group_type: Optional[str] = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud_gov.get_members(db, skip=skip, limit=limit, organ_id=organ_id, group_type=group_type)
 
 @router.get("/{member_id}", response_model=schema_gov.Governance)
 def read_single_member(member_id: int, db: Session = Depends(get_db)):

@@ -10,6 +10,7 @@ class GovernanceBase(BaseModel):
     photo_url: Optional[str] = None
     organ_id: Optional[str] = None # ag, cd, pe, dg
     order: Optional[int] = 0
+    group_type: Optional[str] = "governance"
 
     @field_validator("*", mode="before")
     @classmethod
@@ -38,6 +39,7 @@ class GovernanceCreate(BaseModel):
     photo_url: Optional[str] = None
     organ_id: Optional[str] = None
     order: Optional[int] = 0
+    group_type: Optional[str] = "governance"
 
 class GovernanceUpdate(BaseModel):
     name: Optional[str] = None
@@ -46,6 +48,7 @@ class GovernanceUpdate(BaseModel):
     photo_url: Optional[str] = None
     organ_id: Optional[str] = None
     order: Optional[int] = None
+    group_type: Optional[str] = None
 
 class Governance(GovernanceBase):
     id: int

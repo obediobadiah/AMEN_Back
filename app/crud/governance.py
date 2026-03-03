@@ -3,10 +3,12 @@ from ..models.all_models import GovernanceMember
 from ..schemas.governance import GovernanceCreate, GovernanceUpdate
 from ..core.translate import multi_translate
 
-def get_members(db: Session, skip: int = 0, limit: int = 100, organ_id: str = None):
+def get_members(db: Session, skip: int = 0, limit: int = 100, organ_id: str = None, group_type: str = None):
     query = db.query(GovernanceMember)
     if organ_id:
         query = query.filter(GovernanceMember.organ_id == organ_id)
+    if group_type:
+        query = query.filter(GovernanceMember.group_type == group_type)
     return query.order_by(GovernanceMember.order).offset(skip).limit(limit).all()
 
 def get_member_by_id(db: Session, member_id: int):
