@@ -130,3 +130,15 @@ class LiveStat(Base):
     category = Column(String)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+
+class Donation(Base):
+    __tablename__ = "donations"
+    id = Column(Integer, primary_key=True, index=True)
+    donor = Column(String)
+    email = Column(String)
+    amount = Column(Integer) # In cents or base units
+    currency = Column(String, default="USD")
+    frequency = Column(String) # oneTime, monthly
+    method = Column(String) # card, mobile, bank
+    status = Column(String, default="completed") # pending, completed, failed
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -6,7 +6,7 @@ from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
 from app.db.session import SessionLocal, engine, Base
-from app.models.all_models import News, Project, Resource, Event, Multimedia, GovernanceMember, LiveStat
+from app.models.all_models import News, Project, Resource, Event, Multimedia, GovernanceMember, LiveStat, Donation
 
 def seed_data():
     # Create tables
@@ -197,6 +197,44 @@ def seed_data():
             for s in stats:
                 db.add(LiveStat(**s))
             print("Live Stats seeded!")
+
+        # 8. Seed Donations
+        if not db.query(Donation).first():
+            donations = [
+                {
+                    "donor": "Global Green Fund",
+                    "email": "contact@globalgreen.org",
+                    "amount": 50000,
+                    "currency": "USD",
+                    "frequency": "oneTime",
+                    "method": "bank",
+                    "status": "completed",
+                    "created_at": datetime(2024, 2, 28)
+                },
+                {
+                    "donor": "Sarah Johnson",
+                    "email": "sarah.j@example.com",
+                    "amount": 10000,
+                    "currency": "USD",
+                    "frequency": "monthly",
+                    "method": "card",
+                    "status": "completed",
+                    "created_at": datetime(2024, 3, 1)
+                },
+                {
+                    "donor": "Anonymous Donor",
+                    "email": "donor@secret.me",
+                    "amount": 2500,
+                    "currency": "USD",
+                    "frequency": "oneTime",
+                    "method": "mobile",
+                    "status": "completed",
+                    "created_at": datetime(2024, 3, 2)
+                }
+            ]
+            for d in donations:
+                db.add(Donation(**d))
+            print("Donations seeded!")
 
         db.commit()
         print("Database seeding completed successfully!")

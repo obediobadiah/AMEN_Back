@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from fastapi.staticfiles import StaticFiles
 from .db.session import engine, Base
+from .models import all_models
 
 # Create tables (for testing without alembic initially)
 # In production, use migrations
