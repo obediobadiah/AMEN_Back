@@ -13,8 +13,12 @@ class InquiryBase(BaseModel):
 class InquiryCreate(InquiryBase):
     pass
 
+class InquiryUpdate(BaseModel):
+    status: Optional[str] = None
+
 class Inquiry(InquiryBase):
     id: int
+    status: str
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)

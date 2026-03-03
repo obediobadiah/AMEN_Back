@@ -15,6 +15,13 @@ def read_inquiries(type: Optional[str] = None, skip: int = 0, limit: int = 100, 
 def create_inquiry(inquiry: schema_inquiry.InquiryCreate, db: Session = Depends(get_db)):
     return crud_inquiry.create_inquiry(db, inquiry)
 
+@router.put("/{inquiry_id}", response_model=schema_inquiry.Inquiry)
+def update_inquiry(inquiry_id: int, inquiry_update: schema_inquiry.InquiryUpdate, db: Session = Depends(get_db)):
+    db_inquiry = crud_inquiry.update_inquiry(db, inquiry_id, inquiry_update)
+    if db_inquiry is None:
+        raise HTTPException(status_code=404, detail="Inquiry not found")
+    return db_inquiry
+
 @router.delete("/{inquiry_id}")
 def delete_inquiry(inquiry_id: int, db: Session = Depends(get_db)):
     db_inquiry = crud_inquiry.delete_inquiry(db, inquiry_id)

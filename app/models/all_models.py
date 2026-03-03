@@ -119,6 +119,7 @@ class Inquiry(Base):
     subject = Column(String)
     message = Column(Text)
     data = Column(JSONB) # Extra fields for volunteer/partner
+    status = Column(String, default="Unread")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class LiveStat(Base):

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import news, project, resource, event, multimedia, governance, inquiry, livestat, publication, album, donation
+from .endpoints import news, project, resource, event, multimedia, governance, inquiry, livestat, publication, album, donation, dashboard
 
 api_router = APIRouter()
 api_router.include_router(news.router, prefix="/news", tags=["news"])
@@ -13,3 +13,4 @@ api_router.include_router(livestat.router, prefix="/stats", tags=["stats"])
 api_router.include_router(publication.router, prefix="/publications", tags=["publications"])
 api_router.include_router(album.router, prefix="/albums", tags=["albums"])
 api_router.include_router(donation.router, prefix="/donations", tags=["donations"])
+api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
