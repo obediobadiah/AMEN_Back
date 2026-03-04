@@ -108,7 +108,37 @@ class GovernanceMember(Base):
     organ_id = Column(String) # ag, cd, pe, dg, etc.
     order = Column(Integer, default=0)
     group_type = Column(String, default="governance")
+    # Auth-related: link governance member to a portal user
+    user_id = Column(Integer, ForeignKey("portal_users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class PortalUser(Base):
+    """Portal users who can log into the admin panel."""
+    __tablename__ = "portal_users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False, index=True)
+    hashed_password = Column(String, nullable=False)
+    role = Column(String, default="staff")  # 'admin' or 'staff'
+    is_active = Column(Boolean, default=True)
+    # Optionally linked to a governance member
+    governance_member_id = Column(Integer, ForeignKey("governance_members.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    last_login = Column(DateTime(timezone=True), nullable=True)
+
+class PortalSettings(Base):
+    """Singleton settings row for the portal configuration."""
+    __tablename__ = "portal_settings"
+    id = Column(Integer, primary_key=True, index=True)
+    org_name = Column(String, default="AMEN NGO")
+    primary_email = Column(String, default="contact@amen-ngo.org")
+    website_url = Column(String, default="https://amen-rdc.org")
+    two_factor_enabled = Column(Boolean, default=False)
+    activity_logging_enabled = Column(Boolean, default=True)
+    maintenance_mode = Column(Boolean, default=False)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_by = Column(Integer, ForeignKey("portal_users.id"), nullable=True)
 
 class Inquiry(Base):
     __tablename__ = "inquiries"

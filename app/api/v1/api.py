@@ -1,7 +1,13 @@
 from fastapi import APIRouter
-from .endpoints import news, project, resource, event, multimedia, governance, inquiry, livestat, publication, album, donation, dashboard
+from .endpoints import (
+    news, project, resource, event, multimedia, governance,
+    inquiry, livestat, publication, album, donation, dashboard,
+    auth, settings,
+)
 
 api_router = APIRouter()
+
+# Public-facing / data endpoints
 api_router.include_router(news.router, prefix="/news", tags=["news"])
 api_router.include_router(project.router, prefix="/projects", tags=["projects"])
 api_router.include_router(resource.router, prefix="/resources", tags=["resources"])
@@ -14,3 +20,7 @@ api_router.include_router(publication.router, prefix="/publications", tags=["pub
 api_router.include_router(album.router, prefix="/albums", tags=["albums"])
 api_router.include_router(donation.router, prefix="/donations", tags=["donations"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
+
+# Auth & portal management
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
