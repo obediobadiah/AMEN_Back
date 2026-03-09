@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 from dotenv import load_dotenv
+import urllib.parse
 
 # Try to import psycopg2, fall back to basic postgres if not available
 try:
@@ -12,12 +13,29 @@ except ImportError:
 
 load_dotenv()
 
+def clean_db_url(url: str) -> str:
+    if not url:
+        return url
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+        
+    # Remove unsupported query parameters (like "supa" in Supabase URLs)
+    parts = urllib.parse.urlsplit(url)
+    if parts.query:
+        query_params = urllib.parse.parse_qs(parts.query)
+        # Keep only commonly supported parameters
+        allowed_params = {"sslmode", "options", "client_encoding", "application_name"}
+        new_query_params = {k: v for k, v in query_params.items() if k in allowed_params}
+        new_query = urllib.parse.urlencode(new_query_params, doseq=True)
+        parts = tuple([parts.scheme, parts.netloc, parts.path, new_query, parts.fragment])
+        url = urllib.parse.urlunsplit(parts)
+        
+    return url
+
 # Try to get DATABASE_URL first (for production), fall back to individual vars
-DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+DATABASE_URL = clean_db_url(os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL"))
 
 if DATABASE_URL:
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     # Use psycopg2 dialect if available, otherwise use basic postgres
     if PSYCPOPG2_AVAILABLE and DATABASE_URL.startswith("postgresql://"):
         SQLALCHEMY_DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://")
@@ -25,9 +43,7 @@ if DATABASE_URL:
         SQLALCHEMY_DATABASE_URL = DATABASE_URL
 elif os.getenv("POSTGRES_PRISMA_URL"):
     # Use Supabase Prisma URL if available
-    prisma_url = os.getenv("POSTGRES_PRISMA_URL")
-    if prisma_url.startswith("postgres://"):
-        prisma_url = prisma_url.replace("postgres://", "postgresql://", 1)
+    prisma_url = clean_db_url(os.getenv("POSTGRES_PRISMA_URL"))
     if PSYCPOPG2_AVAILABLE and prisma_url.startswith("postgresql://"):
         SQLALCHEMY_DATABASE_URL = prisma_url.replace("postgresql://", "postgresql+psycopg2://")
     else:

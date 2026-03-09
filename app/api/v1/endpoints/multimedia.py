@@ -8,27 +8,46 @@ import os
 import uuid
 import shutil
 from fastapi import UploadFile, File
+from ....core.supabase import upload_file_to_supabase, supabase_client
 
 router = APIRouter()
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    # Define upload path
-    static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "static")
-    images_dir = os.path.join(static_dir, "images")
-    
     # Create unique filename
-    file_extension = os.path.splitext(file.filename)[1]
+    file_extension = os.path.splitext(file.filename)[1].lower()
     filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = os.path.join(images_dir, filename)
     
-    # Save file
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    # Define temp upload path (writable on Vercel)
+    tmp_path = os.path.join("/tmp", filename)
+    
+    try:
+        # Save file temporarily
+        with open(tmp_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        content_type = file.content_type
         
-    # Return URL (assuming local development default)
-    # The frontend knows how to handle environment-specific base URLs
-    return {"url": f"/static/images/{filename}"}
+        if supabase_client:
+            # Upload to Supabase 'images' bucket
+            bucket = "images" 
+            file_url = upload_file_to_supabase(bucket, tmp_path, filename, content_type)
+        else:
+            # Fallback for local development if Supabase is not configured
+            # Be aware that this won't persist on Vercel!
+            static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "static")
+            images_dir = os.path.join(static_dir, "images")
+            os.makedirs(images_dir, exist_ok=True)
+            local_path = os.path.join(images_dir, filename)
+            shutil.copy(tmp_path, local_path)
+            file_url = f"/static/images/{filename}"
+            
+        return {"url": file_url}
+        
+    finally:
+        # Clean up temp file
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
 @router.get("/", response_model=List[schema_multimedia.Multimedia])
 def read_multimedia(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):

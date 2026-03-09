@@ -68,11 +68,21 @@ app.add_middleware(
 # Ensure static directory exists
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 upload_dir = os.path.join(static_dir, "images")
-for d in [static_dir, upload_dir]:
-    if not os.path.exists(d):
-        os.makedirs(d)
 
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+can_mount_static = True
+try:
+    for d in [static_dir, upload_dir]:
+        if not os.path.exists(d):
+            os.makedirs(d)
+except OSError:
+    print(f"Read-only file system detected. Cannot create {static_dir}")
+    can_mount_static = os.path.exists(static_dir)
+
+if can_mount_static:
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+else:
+    print("Skipping static file mount due to missing directory.")
+
 
 
 @app.on_event("startup")
