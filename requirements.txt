@@ -13,3 +13,4 @@ pyjwt>=2.9.0
 deep-translator>=1.11.4
 
 supabase>=2.0.0
+PyMuPDF>=1.23.0

@@ -63,10 +63,11 @@ else:
 
 # Handle SSL for production databases
 if SQLALCHEMY_DATABASE_URL and ("neon.tech" in SQLALCHEMY_DATABASE_URL or "supabase.co" in SQLALCHEMY_DATABASE_URL):
-    if "?" in SQLALCHEMY_DATABASE_URL:
-        SQLALCHEMY_DATABASE_URL += "&sslmode=require"
-    else:
-        SQLALCHEMY_DATABASE_URL += "?sslmode=require"
+    if "sslmode=" not in SQLALCHEMY_DATABASE_URL:
+        if "?" in SQLALCHEMY_DATABASE_URL:
+            SQLALCHEMY_DATABASE_URL += "&sslmode=require"
+        else:
+            SQLALCHEMY_DATABASE_URL += "?sslmode=require"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
