@@ -16,6 +16,8 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
 
 if DATABASE_URL:
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     # Use psycopg2 dialect if available, otherwise use basic postgres
     if PSYCPOPG2_AVAILABLE and DATABASE_URL.startswith("postgresql://"):
         SQLALCHEMY_DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://")
@@ -24,6 +26,8 @@ if DATABASE_URL:
 elif os.getenv("POSTGRES_PRISMA_URL"):
     # Use Supabase Prisma URL if available
     prisma_url = os.getenv("POSTGRES_PRISMA_URL")
+    if prisma_url.startswith("postgres://"):
+        prisma_url = prisma_url.replace("postgres://", "postgresql://", 1)
     if PSYCPOPG2_AVAILABLE and prisma_url.startswith("postgresql://"):
         SQLALCHEMY_DATABASE_URL = prisma_url.replace("postgresql://", "postgresql+psycopg2://")
     else:
