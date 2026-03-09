@@ -6,7 +6,24 @@ from .db.session import engine, Base, SessionLocal
 from .models import all_models
 
 # Create tables (for testing without alembic initially)
-Base.metadata.create_all(bind=engine)
+# Note: In production, use migrations instead
+try:
+    # Check if we have production database configured (DATABASE_URL, POSTGRES_URL, or Supabase vars)
+    has_prod_db = (
+        os.getenv("DATABASE_URL") or 
+        os.getenv("POSTGRES_URL") or 
+        os.getenv("POSTGRES_PRISMA_URL") or
+        (os.getenv("POSTGRES_HOST") and os.getenv("POSTGRES_HOST") != "localhost")
+    )
+    
+    if has_prod_db:
+        Base.metadata.create_all(bind=engine)
+        print("Database tables created/verified successfully")
+    else:
+        print("Warning: No production database configured. Skipping table creation.")
+except Exception as e:
+    print(f"Warning: Could not connect to database: {e}")
+    print("Continuing without database initialization...")
 
 app = FastAPI(
     title="AMEN Platform API",
