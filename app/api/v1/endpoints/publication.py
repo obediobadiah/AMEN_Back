@@ -57,20 +57,26 @@ async def upload_publication(file: UploadFile = File(...)):
                 thumbnail_url = upload_file_to_supabase("images", thumb_tmp_path, thumb_filename, "image/jpeg")
         else:
             # Local fallback
-            static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "static")
-            docs_dir = os.path.join(static_dir, "documents")
-            images_dir = os.path.join(static_dir, "images")
-            os.makedirs(docs_dir, exist_ok=True)
-            os.makedirs(images_dir, exist_ok=True)
-            
-            local_path = os.path.join(docs_dir, filename)
-            shutil.copy(tmp_path, local_path)
-            file_url = f"/static/documents/{filename}"
-            
-            if os.path.exists(thumb_tmp_path):
-                thumb_local_path = os.path.join(images_dir, thumb_filename)
-                shutil.copy(thumb_tmp_path, thumb_local_path)
-                thumbnail_url = f"/static/images/{thumb_filename}"
+            try:
+                static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "static")
+                docs_dir = os.path.join(static_dir, "documents")
+                images_dir = os.path.join(static_dir, "images")
+                os.makedirs(docs_dir, exist_ok=True)
+                os.makedirs(images_dir, exist_ok=True)
+                
+                local_path = os.path.join(docs_dir, filename)
+                shutil.copy(tmp_path, local_path)
+                file_url = f"/static/documents/{filename}"
+                
+                if os.path.exists(thumb_tmp_path):
+                    thumb_local_path = os.path.join(images_dir, thumb_filename)
+                    shutil.copy(thumb_tmp_path, thumb_local_path)
+                    thumbnail_url = f"/static/images/{thumb_filename}"
+            except OSError:
+                raise HTTPException(
+                    status_code=500,
+                    detail="File upload failed: Read-only file system. Please configure SUPABASE_URL and SUPABASE_KEY for production deployments."
+                )
                 
         return {
             "file_url": file_url,

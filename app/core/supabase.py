@@ -2,7 +2,8 @@ import os
 from supabase import create_client, Client
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+# Use SERVICE_ROLE_KEY or SECRET_KEY for backend (preferring these over anon key for uploads)
+SUPABASE_KEY = os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_ANON_KEY")
 
 # Create a single supabase client instance
 if SUPABASE_URL and SUPABASE_KEY:

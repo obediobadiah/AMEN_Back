@@ -34,13 +34,19 @@ async def upload_file(file: UploadFile = File(...)):
             file_url = upload_file_to_supabase(bucket, tmp_path, filename, content_type)
         else:
             # Fallback for local development if Supabase is not configured
-            # Be aware that this won't persist on Vercel!
-            static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "static")
-            images_dir = os.path.join(static_dir, "images")
-            os.makedirs(images_dir, exist_ok=True)
-            local_path = os.path.join(images_dir, filename)
-            shutil.copy(tmp_path, local_path)
-            file_url = f"/static/images/{filename}"
+            try:
+                static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "static")
+                images_dir = os.path.join(static_dir, "images")
+                os.makedirs(images_dir, exist_ok=True)
+                local_path = os.path.join(images_dir, filename)
+                shutil.copy(tmp_path, local_path)
+                file_url = f"/static/images/{filename}"
+            except OSError as e:
+                # This happens on Vercel if Supabase is not configured
+                raise HTTPException(
+                    status_code=500, 
+                    detail="File upload failed: Read-only file system. Please configure SUPABASE_URL and SUPABASE_KEY for production deployments."
+                )
             
         return {"url": file_url}
         
