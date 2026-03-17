@@ -14,12 +14,24 @@ else:
 def upload_file_to_supabase(bucket_name: str, file_path: str, destination_name: str, content_type: str = None) -> str:
     """
     Uploads a local file to Supabase Storage and returns the public URL.
+    Attempts to create the bucket if it doesn't exist.
     """
     if not supabase_client:
         raise ValueError("Supabase client is not configured. Missing SUPABASE_URL or SUPABASE_KEY.")
 
     try:
-        # Check if bucket exists, if not, you might need to handle it or assume it exists
+        # Ensure bucket exists
+        try:
+            supabase_client.storage.get_bucket(bucket_name)
+        except Exception:
+            # If get_bucket fails, attempt to create it as a public bucket
+            try:
+                supabase_client.storage.create_bucket(bucket_name, options={"public": True})
+                print(f"Created missing public bucket: {bucket_name}")
+            except Exception as create_err:
+                print(f"Failed to create bucket {bucket_name}: {create_err}")
+                # We continue anyway, as the upload might still work if it was just a transient error
+
         # Upload file
         with open(file_path, "rb") as f:
             opts = {"content-type": content_type} if content_type else {}
